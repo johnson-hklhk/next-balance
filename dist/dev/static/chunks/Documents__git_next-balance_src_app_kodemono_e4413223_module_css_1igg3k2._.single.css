@@ -1,0 +1,51 @@
+/* [project]/Documents/_git/next-balance/src/app/kodemono_e4413223.module.css [app-client] (css) */
+@font-face {
+  font-family: kodeMono;
+  src: url("../media/KodeMono_Regular-s.p.2o-nfr65m2q5j.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: kodeMono;
+  src: url("../media/KodeMono_Medium-s.p.1zb0t7ruj22t4.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: kodeMono;
+  src: url("../media/KodeMono_SemiBold-s.p.2rp24arehpv14.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: kodeMono;
+  src: url("../media/KodeMono_Bold-s.p.2pcxep56qla8c.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: kodeMono Fallback;
+  src: local(Arial);
+  ascent-override: 74.53%;
+  descent-override: 22.82%;
+  line-gap-override: 0.0%;
+  size-adjust: 131.49%;
+}
+
+.kodemono_e4413223-module__-nYenq__className {
+  font-family: kodeMono, kodeMono Fallback;
+}
+
+.kodemono_e4413223-module__-nYenq__variable {
+  --font-kodemono: "kodeMono", "kodeMono Fallback";
+}
+
+/*# sourceMappingURL=Documents__git_next-balance_src_app_kodemono_e4413223_module_css_1igg3k2._.single.css.map*/

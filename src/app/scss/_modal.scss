@@ -1,0 +1,173 @@
+@use "tokens" as *;
+
+// Bootstrap keeps the modal's behaviour — focus trap, backdrop, escape — and
+// loses its looks. Everything below is a skin over its own classes.
+.modal-backdrop {
+  --bs-backdrop-bg: var(--ink);
+  --bs-backdrop-opacity: 0.6;
+}
+
+.modal-content {
+  background: var(--paper);
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--drop);
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+// Panel titles, as the boxed readout the header uses. The brackets are drawn
+// here rather than written into the markup so every h3 in a dialog gets them
+// without the components having to know about the convention.
+//
+// width: max-content, not align-self: flex-start — the dialogs stack their
+// contents in a column flex box, and a title with an auto cross-size would
+// stretch to the full width of it. A definite width opts out of that, and still
+// behaves in the one row-flex header that also holds buttons.
+.modal h3 {
+  width: max-content;
+  padding: 3px 10px;
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--radius);
+  @include display(0.16em);
+  font-size: 11px;
+  text-transform: uppercase;
+
+  &::before {
+    content: "[ ";
+  }
+
+  &::after {
+    content: " ]";
+  }
+}
+
+.modal hr {
+  margin: 1rem 0;
+  border: 0;
+  border-top: var(--bw) solid var(--ink);
+  opacity: 1;
+}
+
+// --- fields ----------------------------------------------------------------
+// Underlined rather than boxed: a dialog already sits inside a heavy 2px frame,
+// and a second box per field turns the panel into a grid of nested rectangles.
+.form-control,
+.form-select {
+  border-radius: 0;
+  border: 0;
+  border-bottom: var(--bw) solid var(--ink);
+  padding: 0.35em 0.2em 0.2em;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--ink);
+
+  &:focus {
+    border-color: var(--ink);
+    box-shadow: none;
+    background-color: var(--paper-alt);
+  }
+
+  &::placeholder {
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.85em;
+  }
+}
+
+.form-control {
+  background-color: transparent;
+}
+
+// Only the colour, so Bootstrap's caret background-image survives.
+.form-select {
+  background-color: transparent;
+}
+
+// --- lists -----------------------------------------------------------------
+// Shared between the settle, saves and tables panels: rows separated by a
+// hairline, the block itself capped and scrollable.
+%hud-list {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+%hud-list-item {
+  padding: 0.45em 0;
+  border-bottom: var(--hair) solid var(--slab-soft);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.settle-list {
+  &__item {
+    @extend %hud-list-item;
+
+    b {
+      @include display(0.02em);
+      white-space: nowrap;
+      padding-left: 1em;
+    }
+  }
+}
+
+.saves-list {
+  @extend %hud-list;
+
+  &__item {
+    @extend %hud-list-item;
+  }
+
+  &__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Same row shape as .data-list — a field that takes the width with its action
+// pinned to the right end. flex on the key because .theme-btn drops its
+// min-width floor on small screens, and without it the button would be the
+// thing that gives way to a long name rather than the field.
+.user-list {
+  @extend %hud-list;
+
+  &__item {
+    padding: 0.35em 0;
+
+    .theme-btn {
+      flex: 0 0 auto;
+    }
+  }
+}
+
+.data-list {
+  @extend %hud-list;
+
+  &__item {
+    padding: 0.35em 0;
+
+    &--active .form-control {
+      @include display(0.02em);
+    }
+  }
+
+  // The one filled chip in the dialogs — the active table is the only piece of
+  // state a panel reports back rather than asks for, so it reads as a readout.
+  &__badge {
+    flex: 0 0 auto;
+    padding: 2px 9px;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: var(--radius);
+    @include display(0.14em);
+    font-size: 10px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+}

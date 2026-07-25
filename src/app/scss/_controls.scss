@@ -1,0 +1,251 @@
+@use "tokens" as *;
+
+// Floating console at the bottom of the sheet. A plate rather than a full-width
+// strip: the hard offset shade only reads as one if the thing casting it has
+// edges on all four sides.
+.control-nav {
+  position: fixed;
+  // Centred by auto margins on a full-width containing block, not by
+  // left: 50% + translateX. With left at 50% the space a shrink-to-fit box gets
+  // to lay itself out in is only the remaining 50vw, so the keys wrapped at
+  // half the width actually available to them.
+  inset: auto 0 var(--gutter) 0;
+  z-index: 30;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: fit-content;
+  max-width: calc(100vw - var(--gutter) * 2);
+  margin-inline: auto;
+  padding: 8px 12px;
+  background: var(--paper);
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--drop);
+
+  // Splits the record actions from the storage actions. A drawn rule rather
+  // than the dot it used to be — it has to read as a divider at 2px.
+  &__hr {
+    flex: 0 0 var(--bw);
+    align-self: stretch;
+    margin: 2px 4px;
+    background-color: var(--ink);
+
+    // Once the keys wrap, a vertical rule lands wherever the reflow drops it
+    // and stops dividing anything. Turned on its side it forces the break
+    // instead, so the two groups always land on their own lines.
+    @include down(md) {
+      flex: 0 0 100%;
+      height: var(--bw);
+      align-self: auto;
+      margin: 2px 0;
+    }
+  }
+}
+
+// The system's control key: a chamfered block whose 2px shell is the element's
+// own background, with a paper face inset on a pseudo. Drawn this way rather
+// than with a real border because clip-path cuts the border off along the
+// diagonal, leaving the two chamfered edges unstroked.
+//
+// The chamfer itself is the whole interaction: it opens on hover and nips in on
+// press. Both animate — clip-path interpolates between polygons with matching
+// point counts, which these have.
+.theme-btn {
+  --cut: 8px;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  // Word labels, so the block sizes to its text. A floor keeps the short ones
+  // ("All", "New") from collapsing to a chip beside the long ones.
+  min-width: 68px;
+  padding: 0.5em 0.9em 0.45em;
+  border: none;
+
+  // On a phone the console is the whole bottom of the screen; the floor and the
+  // wide padding are what push it to four rows there. Dropped so the keys sit
+  // three to a line.
+  @include down(sm) {
+    min-width: 0;
+    padding: 0.5em 0.65em 0.45em;
+  }
+  background-color: var(--ink);
+  color: var(--ink);
+  cursor: pointer;
+  @include chamfer(var(--cut));
+  // A box-shadow would square the cut corners back off; drop-shadow traces the
+  // clipped silhouette.
+  filter: drop-shadow(var(--drop-sm));
+  transition: clip-path 0.2s var(--ease), color 0.15s linear, filter 0.15s linear;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: var(--bw);
+    background-color: var(--paper);
+    @include chamfer(calc(var(--cut) - var(--bw)));
+    transition: clip-path 0.2s var(--ease), background-color 0.15s linear;
+  }
+
+  &__label {
+    position: relative;
+    @include display(0.12em, 500);
+    font-size: 12px;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    @include down(sm) {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+    }
+  }
+
+  &:not(:disabled) {
+    &:hover,
+    &:focus-visible {
+      --cut: 14px;
+
+      color: var(--paper);
+
+      &::before {
+        background-color: var(--ink);
+      }
+    }
+
+    // Nips the corners in and drops the key onto the page — the shade collapses
+    // as the block moves into it, which is what a physical press looks like.
+    &:active {
+      --cut: 5px;
+
+      filter: drop-shadow(1px 1px 0 var(--shade));
+    }
+  }
+
+  // A shut key: hatched face, faded mark, no shade to lift it off the plate.
+  &:disabled {
+    color: var(--ink-faint);
+    background-color: var(--ink-faint);
+    cursor: default;
+    filter: none;
+
+    &::before {
+      background-color: var(--paper);
+      background-image: repeating-linear-gradient(-45deg, transparent 0 4px, var(--slab-soft) 4px 5px);
+    }
+  }
+
+  // clip-path clips the element's own outline away, so the focus ring cannot
+  // live outside the key. The hover invert above is the visible focus state;
+  // this just stops the browser drawing a half-clipped default ring.
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+// Payer / partner toggles. Deliberately NOT the .theme-btn shell — these used
+// to be the same chamfered block at tag scale, which put a control you press
+// and a state you read in the same silhouette, side by side in the add-record
+// dialog. A drawn mark plus a bare label has nothing in common with a key: no
+// chamfer, no face, no shade, and the only thing that fills is the mark.
+//
+// Square marks for the partner checkboxes, round for the payer radio — the
+// convention is worth honouring since one is "any number of" and the other is
+// "exactly one", and the shape is the only place that distinction is visible.
+.select-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  padding: 0.3em 0.5em 0.25em 0.15em;
+  color: var(--ink-soft);
+  cursor: pointer;
+  white-space: nowrap;
+  @include display(0.1em, 500);
+  font-size: 12px;
+  text-transform: uppercase;
+  transition: color 0.15s linear;
+
+  &__mark {
+    position: relative;
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    background-color: var(--paper);
+    border: var(--bw) solid var(--ink-faint);
+    transition: background-color 0.15s linear, border-color 0.15s linear;
+
+    // The tick: two edges of a small box, turned 45°. Scaled from 0 so checking
+    // draws it on rather than snapping it in.
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 4px;
+      height: 7px;
+      border: solid var(--paper);
+      border-width: 0 var(--bw) var(--bw) 0;
+      transform: translateY(-1px) rotate(45deg) scale(0);
+      transition: transform 0.18s var(--ease);
+    }
+  }
+
+  &__label {
+    position: relative;
+  }
+
+  // Unchecked marks sit at --ink-faint so a full row of them stays quiet; the
+  // outline firms up under the pointer to show the whole label is the hit area.
+  &:hover &__mark {
+    border-color: var(--ink);
+  }
+
+  &:has(input:checked) {
+    color: var(--ink);
+
+    .select-box__mark {
+      background-color: var(--ink);
+      border-color: var(--ink);
+
+      &::after {
+        transform: translateY(-1px) rotate(45deg) scale(1);
+      }
+    }
+  }
+
+  // Radio: round mark, and a dot instead of a tick.
+  &:has(input[type="radio"]) .select-box__mark {
+    border-radius: 50%;
+
+    &::after {
+      width: 6px;
+      height: 6px;
+      border: 0;
+      border-radius: 50%;
+      background-color: var(--paper);
+      transform: scale(0);
+    }
+  }
+
+  &:has(input[type="radio"]:checked) .select-box__mark::after {
+    transform: scale(1);
+  }
+
+  // Focus lives on the hidden input, so the ring has to be borrowed by the
+  // label — otherwise keyboard users get nothing at all.
+  &:has(input:focus-visible) {
+    outline: var(--bw) solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+}

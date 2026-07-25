@@ -1,0 +1,121 @@
+@use "tokens" as *;
+
+// Fixed status strip across the top. Opaque on purpose: the sheet scrolls
+// underneath it, and the pinned column heads sit directly below its border —
+// see --header-h in _tokens.scss, which both this and _sheet.scss measure from.
+//
+// z-index sits under Bootstrap's modal layer (1055) and under the splash.
+.hud {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--header-h);
+  padding: 0 var(--gutter);
+  background: var(--paper);
+  border-bottom: var(--bw) solid var(--ink);
+
+  // The app's own plate: filled, chamfered on the same two corners every
+  // control in the system cuts, so the header reads as part of the set.
+  &__mark {
+    --cut: 8px;
+
+    flex: none;
+    padding: 4px 12px 3px;
+    background: var(--ink);
+    color: var(--paper);
+    @include display(0.12em);
+    @include chamfer(var(--cut));
+    font-size: 12px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  // Runs the eye from the mark out to the readout. Purely a rule — it carries
+  // no content, so it is the first thing to go when the row gets tight.
+  &__wire {
+    flex: 1;
+    min-width: 12px;
+    height: var(--bw);
+    background: var(--ink);
+
+    @include down(sm) {
+      display: none;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0; // lets the table-name chip below actually shrink and ellipsis
+    margin-left: auto;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  // The active table's name. This is the one variable-length thing in the row,
+  // so it is the only part allowed to truncate.
+  &__table {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    // The readout is a fixed-height chip; an overflowing name must clip inside
+    // it rather than push the clock off the end of the row.
+    max-width: min(46vw, 320px);
+  }
+
+  &__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ink-faint);
+
+    // Steps rather than a fade: a tweened pulse reads as a soft glow, a hard
+    // on/off reads as a device that is actually running.
+    &::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: currentColor;
+      animation: hud-blink 1.8s steps(1, end) infinite;
+    }
+
+    @include down(md) {
+      display: none;
+    }
+  }
+
+  &__clock {
+    flex: none;
+    color: var(--ink-soft);
+
+    @include down(sm) {
+      display: none;
+    }
+  }
+}
+
+@keyframes hud-blink {
+  0%,
+  55% {
+    opacity: 1;
+  }
+
+  56%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
+// The global override only collapses durations, which on an infinite stepped
+// loop parks the light on whichever frame it landed on. Kill it and hold it lit.
+@media (prefers-reduced-motion: reduce) {
+  .hud__status::before {
+    animation: none;
+    opacity: 1;
+  }
+}

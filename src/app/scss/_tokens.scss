@@ -1,0 +1,85 @@
+// Design tokens + shared mixins.
+// Visual language ported from the portfolio: monochrome techno-HUD. Black,
+// white, two greys, hard-edged offset shadows, squared-off mono type. The only
+// hue in the system is the owe/owed signal on the totals — see --pos / --neg.
+@use "sass:map";
+
+$bp: (
+  sm: 480px,
+  md: 768px,
+  lg: 1024px,
+);
+
+@mixin up($key) {
+  @media (min-width: map.get($bp, $key)) {
+    @content;
+  }
+}
+
+@mixin down($key) {
+  @media (max-width: (map.get($bp, $key) - 1px)) {
+    @content;
+  }
+}
+
+// Titles, nav labels and column heads. Kode Mono ships real weights, so this
+// asks for 600 instead of letting the browser fake a bold.
+@mixin display($tracking: 0.04em, $weight: 600) {
+  font-family: var(--font-display);
+  font-weight: $weight;
+  letter-spacing: $tracking;
+}
+
+// The chamfer shared by every control: two opposite corners cut back at 45°.
+// Passed a length rather than reading --cut directly so the inner paper face of
+// a bordered control can be clipped one border-width tighter than its shell.
+@mixin chamfer($cut) {
+  clip-path: polygon(#{$cut} 0, 100% 0, 100% calc(100% - #{$cut}), calc(100% - #{$cut}) 100%, 0 100%, 0 #{$cut});
+}
+
+:root {
+  --ink: #101010;
+  --ink-soft: #5c5c5c;
+  --ink-faint: #9b9b9b;
+  --paper: #ffffff;
+  --paper-alt: #f2f2f2;
+  --slab: #b5b5b5;
+  --slab-soft: #d8d8d8;
+
+  // Kept as aliases so nothing downstream has to know the font is loaded under
+  // a Next-generated variable name. One family carries both roles here: only
+  // Kode Mono is self-hosted, and the build is a static export, so pulling a
+  // second face from Google would add a network fetch to `next build`.
+  --font-display: var(--font-kodemono), "Microsoft JhengHei", 微軟正黑體, monospace;
+  --font-mono: var(--font-kodemono), "Microsoft JhengHei", 微軟正黑體, monospace;
+
+  // The one place hue is allowed. Muted well off the raw red/green keywords so
+  // they sit inside the monochrome palette instead of shouting over it; both
+  // clear 6:1 against paper.
+  --pos: #2f6b3a;
+  --neg: #a33a2f;
+
+  // Hard offset shadow — the signature of the whole system. `--shade` is the
+  // same value as a plain colour, for shadows drawn as real elements or as a
+  // drop-shadow filter (which is what a chamfered control needs, since
+  // box-shadow squares the cut corners back off).
+  --shade: rgba(16, 16, 16, 0.22);
+  --drop: 5px 5px 0 var(--shade);
+  --drop-sm: 3px 3px 0 var(--shade);
+
+  --radius: 3px;
+  --radius-lg: 10px;
+  --bw: 2px; // standard border weight
+  --hair: 1px; // the lighter rule, for row separators inside a framed block
+  --gutter: 14px;
+  // Fixed, because the pinned sheet layers are positioned against it — see
+  // _sheet.scss, where the ghost tables offset by exactly this much.
+  --header-h: 38px;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  @include up(md) {
+    --gutter: 24px;
+    --header-h: 44px;
+  }
+}

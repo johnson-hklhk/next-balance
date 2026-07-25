@@ -1,0 +1,84 @@
+@use "tokens" as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  // Figures sit in columns all over this app — totals, per-row splits, the
+  // clock. Tabular figures stop every one of them from twitching as digits swap.
+  font-variant-numeric: tabular-nums;
+
+  @include down(sm) {
+    font-size: 14px;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+// Was a separate CJK stack, which put the amounts on a different face from
+// everything around them. They belong on the mono.
+code {
+  font-family: var(--font-mono);
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: var(--bw) solid var(--ink);
+  outline-offset: 2px;
+}
+
+// Boxed readout, e.g. [ 2026-07-25 ] — the system's label primitive.
+.readout {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 9px;
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--radius);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &--fill {
+    background: var(--ink);
+    color: var(--paper);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

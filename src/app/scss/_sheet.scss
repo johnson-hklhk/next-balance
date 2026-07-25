@@ -1,0 +1,221 @@
+@use "tokens" as *;
+
+// The sheet is four copies of the same table stacked on top of each other: the
+// real one in flow (`body`), plus three fixed ghosts that each reveal one slice
+// — the column heads (`head`), the pinned label column (`user`), and the corner
+// cell where the two cross (`gap`). Each ghost hides everything it is not
+// responsible for, so the visible result is a single table with a frozen row
+// and a frozen column. None of that is new here; what the reskin has to respect
+// is that a ghost must never leak a border, a background or a shadow.
+//
+// Two consequences run through this file:
+//   * no border on the <table> itself — the `head` ghost is translated
+//     horizontally, so any frame drawn on it would slide out from under the
+//     other three.
+//   * cells must be opaque, or rows scrolling underneath show through the
+//     frozen slices. That is what --bs-table-bg buys below.
+.balance-sheet {
+  --bs-table-color: var(--ink);
+  --bs-table-bg: var(--paper);
+  --bs-table-striped-color: var(--ink);
+  --bs-table-striped-bg: var(--paper-alt);
+  --bs-table-border-color: var(--slab-soft);
+
+  position: relative;
+  min-width: 100%;
+  min-height: 100vh;
+  overflow-x: auto;
+  // Clears the fixed header at the top and the control bar at the bottom.
+  padding-top: var(--header-h);
+  padding-bottom: 132px;
+
+  // The ghosts hang off the same header offset the strip above occupies, so
+  // their frozen row lands exactly where the real table's does at scroll 0.
+  &__head,
+  &__user,
+  &__gap {
+    position: fixed;
+    inset: var(--header-h) 0 0 0;
+    pointer-events: none !important;
+  }
+
+  &__gap,
+  &__head {
+    tbody,
+    tfoot {
+      opacity: 0 !important;
+
+      th,
+      td {
+        border-color: transparent !important;
+        box-shadow: none !important;
+      }
+    }
+  }
+
+  &__gap {
+    th:not(:first-child) {
+      opacity: 0 !important;
+    }
+  }
+
+  &__user {
+    th,
+    td {
+      &:not(:first-child) {
+        opacity: 0 !important;
+        border-color: transparent !important;
+      }
+    }
+  }
+
+  &__body {
+    thead {
+      opacity: 0 !important;
+    }
+
+    th,
+    td {
+      &:first-child {
+        opacity: 0 !important;
+        border-color: transparent !important;
+      }
+    }
+  }
+
+  // The pinned label column needs a hard edge, or amounts scrolling behind it
+  // read as though they belong to it. Only the two ghosts that actually render
+  // that column draw the rule — on `body` it would sit under a hidden cell.
+  &__user,
+  &__gap {
+    th:first-child,
+    td:first-child {
+      border-right: var(--bw) solid var(--ink);
+    }
+  }
+
+  // --- the table proper ----------------------------------------------------
+  table {
+    margin: 0;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.35rem;
+    border-bottom-color: var(--slab-soft);
+    transition: background-color 0.15s linear, color 0.15s linear;
+  }
+
+  // Column heads: the slab strip. Sits on a solid grey rather than paper so the
+  // frozen row is unmistakably chrome and not the first record.
+  thead th {
+    background-color: var(--slab);
+    border-bottom: var(--bw) solid var(--ink);
+    @include display(0.1em);
+    font-size: 11px;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    text-align: left;
+    font-weight: 400;
+  }
+
+  // The record's own amount, under its label. The row's headline figure, so it
+  // takes the display weight while the label stays plain.
+  &__amount {
+    @include display(0.02em);
+    font-size: 1.02em;
+  }
+
+  // The currency-of-origin note, e.g. (JPY 4800).
+  sub {
+    bottom: 0;
+    font-size: 0.72em;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+  }
+
+  &__grip {
+    flex: 0 0 auto;
+    line-height: 1;
+    color: var(--ink-faint);
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    transition: color 0.15s linear;
+
+    &:hover {
+      color: var(--ink);
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  // Only the pinned `user` ghost's grip is interactive; the others fall through.
+  &__user &__grip {
+    pointer-events: auto;
+  }
+
+  // Full ink invert. box-shadow is reset alongside the background because
+  // Bootstrap paints its stripe as a 9999px inset shadow, which would otherwise
+  // sit on top of the fill.
+  &__row--selected {
+    th,
+    td {
+      background-color: var(--ink) !important;
+      box-shadow: none !important;
+      color: var(--paper);
+      border-bottom-color: var(--ink);
+    }
+
+    .balance-sheet__grip {
+      color: var(--slab);
+    }
+
+    sub {
+      color: var(--slab);
+    }
+  }
+
+  // --- totals --------------------------------------------------------------
+  tfoot {
+    td {
+      background-color: var(--paper-alt);
+      border-top: var(--bw) solid var(--ink);
+      border-bottom: 0;
+      padding-top: 0.6rem;
+      padding-bottom: 0.6rem;
+      vertical-align: middle;
+    }
+  }
+
+  &__total-label {
+    @include display(0.14em);
+    font-size: 10px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  &__total {
+    @include display(0.02em);
+    font-size: 1.15em;
+    line-height: 1;
+
+    &--pos {
+      color: var(--pos);
+    }
+
+    &--neg {
+      color: var(--neg);
+    }
+  }
+}
