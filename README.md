@@ -4,6 +4,8 @@ A split-bill / shared-expense calculator for trips and group dinners. Add who pa
 
 **Live tool → [johnsonhklhk.com/balance](https://johnsonhklhk.com/balance/)**
 
+**Repository → [github.com/johnson-hklhk/next-balance](https://github.com/johnson-hklhk/next-balance)**
+
 No account, no server, no database — everything runs in the browser and is stored in `localStorage`.
 
 ---
@@ -49,7 +51,7 @@ Settlement then runs a greedy match over those totals (`computeSettlements` in [
 ## Getting started
 
 ```bash
-git clone <repo-url> next-balance
+git clone https://github.com/johnson-hklhk/next-balance.git
 cd next-balance
 npm install
 npm run dev
